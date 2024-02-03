@@ -1,14 +1,18 @@
 import express from "express"
 import mongoose from "mongoose"
 import { Server} from "socket.io"
-import Document from "./models/Document.js" 
 import http from "http"
 import cors from "cors";
+import AuthController from "./controllers/authController.js"
+import socketController from "./sockets/socketRoutes.js"
+import RequestController from "./controllers/requestController.js"
+import Document from "./models/Document.js"
+import dotenv from 'dotenv';
+dotenv.config();
 
 
 
-
-const uri = "mongodb+srv://mshubham:Atlass2023@cluster0.vtpm8td.mongodb.net/Documents?retryWrites=true&w=majority";
+const uri = `mongodb+srv://mshubham:${process.env.MONGO_PASS}@cluster0.vtpm8td.mongodb.net/Documents?retryWrites=true&w=majority`;
 
 try{
   await mongoose.connect(uri); 
@@ -19,37 +23,35 @@ try{
  }
 const app =express()
 const httpserver = http.createServer(app);
-const io = new Server(httpserver, { cors: ["*"] });
 const PORT = process.env.PORT || 7000;
+const io = new Server(httpserver, { cors: ["*"] });
 
-const defaultValue = ""
-
+io.on("connection",socketController)
 app.use(express.json());
 app.use(cors());
+app.use("/users",AuthController)
+app.use("/requests",RequestController)
+app.post("/fetchdocs", async (req, res) => {
+  const doclist = [];
+  const reqData = req.body;
 
-io.on("connection", socket => {
-  socket.on("get-document", async documentId => {
-    const document = await findOrCreateDocument(documentId)
-    socket.join(documentId)
-    socket.emit("load-document", document.data)
+  try {
+    const alldocs = await Document.find({});
 
-    socket.on("send-changes", delta => {
-      socket.broadcast.to(documentId).emit("receive-changes", delta)
-    })
+    alldocs.forEach((doc) => {
+      const thisContributors = doc.contributors;
 
-    socket.on("save-document", async data => {
-      await Document.findByIdAndUpdate(documentId, { data })
-    })
-  })
-})
+      if (thisContributors.includes(reqData.username)) {
+        doclist.push(doc);
+      }
+    });
 
-async function findOrCreateDocument(id) {
-  if (id == null) return
-
-  const document = await Document.findById(id)
-  if (document) return document
-  return await Document.create({ _id: id, data: defaultValue })
-}
+    res.status(200).send({ doclist });
+  } catch (error) {
+    console.error("Error fetching docs from db:", error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
 
 httpserver.listen(PORT, function () {
     console.log("The server is up and running at", PORT, ":)");
