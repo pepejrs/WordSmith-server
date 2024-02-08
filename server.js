@@ -8,6 +8,7 @@ import socketController from "./sockets/socketRoutes.js"
 import RequestController from "./controllers/requestController.js"
 import Document from "./models/Document.js"
 import dotenv from 'dotenv';
+import chatController from "./controllers/chatController.js"
 dotenv.config();
 
 
@@ -31,6 +32,7 @@ app.use(express.json());
 app.use(cors());
 app.use("/users",AuthController)
 app.use("/requests",RequestController)
+app.use("/chat",chatController)
 app.post("/fetchdocs", async (req, res) => {
   const doclist = [];
   const reqData = req.body;
