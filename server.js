@@ -9,6 +9,7 @@ import RequestController from "./controllers/requestController.js"
 import Document from "./models/Document.js"
 import dotenv from 'dotenv';
 import chatController from "./controllers/chatController.js"
+import documentController from "./controllers/documentController.js"
 dotenv.config();
 
 
@@ -33,27 +34,8 @@ app.use(cors());
 app.use("/users",AuthController)
 app.use("/requests",RequestController)
 app.use("/chat",chatController)
-app.post("/fetchdocs", async (req, res) => {
-  const doclist = [];
-  const reqData = req.body;
+app.use("/docs",documentController)
 
-  try {
-    const alldocs = await Document.find({});
-
-    alldocs.forEach((doc) => {
-      const thisContributors = doc.contributors;
-
-      if (thisContributors.includes(reqData.username)) {
-        doclist.push(doc);
-      }
-    });
-
-    res.status(200).send({ doclist });
-  } catch (error) {
-    console.error("Error fetching docs from db:", error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-});
 
 httpserver.listen(PORT, function () {
     console.log("The server is up and running at", PORT, ":)");
