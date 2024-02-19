@@ -7,9 +7,9 @@ import AuthController from "./controllers/authController.js"
 import socketController from "./sockets/socketRoutes.js"
 import RequestController from "./controllers/requestController.js"
 import Document from "./models/Document.js"
-import dotenv from 'dotenv';
 import chatController from "./controllers/chatController.js"
 import documentController from "./controllers/documentController.js"
+import dotenv from 'dotenv';
 dotenv.config();
 
 
@@ -35,6 +35,7 @@ app.use("/users",AuthController)
 app.use("/requests",RequestController)
 app.use("/chat",chatController)
 app.use("/docs",documentController)
+
 
 
 httpserver.listen(PORT, function () {

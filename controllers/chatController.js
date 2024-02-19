@@ -1,12 +1,13 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Router from "express"
+import dotenv from 'dotenv';
+dotenv.config();
 
 
 const router =Router()
-
-const genAI = new GoogleGenerativeAI("AIzaSyCa5arEZ5HhdRL-UZGgdXzB1xJj9hu6RWc");
-
+const api_key =process.env.GOOGLE_API
+const genAI = new GoogleGenerativeAI(api_key);
 router.post("/generateResponse",async (req,res)=>{
 
 try{

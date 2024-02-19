@@ -18,14 +18,15 @@ const router =express.Router()
               const sentDtaConfirm = {
               
                 username: user[0].username,
-                status: "Success",
+                status: 202,
+                msg:"success"
               };
-              res.send(sentDtaConfirm);
+              res.status(202).send(sentDtaConfirm);
             } else {
-              res.send("User exists password incorrect");
+              res.status(200).send({msg:"User exists password incorrect",status:401});
             }
           } catch {
-            res.status(500).send("error");
+            res.status(200).send({msg:"error",status:500});
           }
         }
       });
